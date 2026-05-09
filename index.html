@@ -1,89 +1,112 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Client Site Manager | Love-Music-AI Corp</title>
+    <title>Client Site Manager | Love-Music-AI</title>
+    <script type="module">
+        // --- FIREBASE CORE CONFIG ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyBhht8EBXClI_eBWADCKHPGCywnir1bRiE",
+          authDomain: "bluepanda-ai.firebaseapp.com",
+          projectId: "bluepanda-ai",
+          storageBucket: "bluepanda-ai.firebasestorage.app",
+          messagingSenderId: "778830127801",
+          appId: "1:778830127801:web:4ac3d72ae7e2ae6fe33168"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- LOGIN LOGIC ---
+        window.checkLogin = function() {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            // Use your custom access code here
+            if(email === "client@gmail.com" && pass === "stark2026") {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('admin-panel').style.display = 'block';
+                loadCurrentData();
+            } else {
+                alert("Access Denied.");
+            }
+        };
+
+        // --- SAVE & PUBLISH LOGIC ---
+        window.publishSite = async function() {
+            const btn = document.getElementById('pub-btn');
+            btn.innerText = "UPLOADING...";
+            
+            const data = {
+                title: document.getElementById('edit-title').value,
+                image: document.getElementById('edit-image').value,
+                text: document.getElementById('edit-text').value,
+                timestamp: Date.now()
+            };
+
+            try {
+                // Saves to a collection called 'clientSites' with ID 'mainSite'
+                await setDoc(doc(db, "clientSites", "mainSite"), data);
+                alert("🚀 PUBLISHED! Your client's site is now updated globally.");
+                btn.innerText = "UPLOAD & PUBLISH TO PUBLIC";
+            } catch (e) {
+                alert("Error: " + e.message);
+            }
+        };
+
+        async function loadCurrentData() {
+            const docSnap = await getDoc(doc(db, "clientSites", "mainSite"));
+            if (docSnap.exists()) {
+                const d = docSnap.data();
+                document.getElementById('edit-title').value = d.title;
+                document.getElementById('edit-image').value = d.image;
+                document.getElementById('edit-text').value = d.text;
+                updatePreview();
+            }
+        }
+    </script>
     <style>
         :root { --blue: #38bdf8; --gold: #fbbf24; --dark: #070a13; }
         body { background: var(--dark); color: white; font-family: sans-serif; margin: 0; padding: 20px; }
-        .container { max-width: 800px; margin: auto; border: 2px solid var(--blue); border-radius: 20px; padding: 20px; box-shadow: 0 0 20px var(--blue); }
-        
-        /* Editor Controls */
-        .editor-panel { background: #111827; padding: 20px; border-radius: 15px; border: 1px solid var(--gold); margin-bottom: 30px; display: none; }
-        input, textarea { width: 100%; padding: 12px; margin: 10px 0; background: #1f2937; border: 1px solid var(--blue); color: white; border-radius: 8px; box-sizing: border-box; }
-        button { background: var(--gold); color: black; font-weight: bold; padding: 12px 25px; border: none; border-radius: 30px; cursor: pointer; }
-        
-        /* Live Preview Section */
-        .preview-site { background: white; color: black; padding: 40px; border-radius: 10px; text-align: center; }
-        .preview-site img { max-width: 100%; height: 300px; object-fit: cover; border-radius: 10px; margin: 20px 0; }
-        
-        #login-screen { text-align: center; padding: 50px; }
+        .container { max-width: 600px; margin: auto; border: 2px solid var(--blue); border-radius: 24px; padding: 25px; box-shadow: 0 0 20px var(--blue); }
+        input, textarea { width: 100%; padding: 12px; margin: 10px 0; background: #111827; border: 1px solid var(--blue); color: white; border-radius: 12px; box-sizing: border-box; }
+        button { width: 100%; background: var(--gold); color: black; font-weight: bold; padding: 15px; border: none; border-radius: 30px; cursor: pointer; margin-top: 10px; }
+        #login-screen { text-align: center; }
+        .preview { background: white; color: black; padding: 20px; border-radius: 15px; margin-top: 20px; text-align: center; }
+        .preview img { width: 100%; height: 200px; object-fit: cover; border-radius: 10px; }
     </style>
 </head>
 <body>
 
     <div id="login-screen" class="container">
-        <h1>CLIENT SECURE LOGIN</h1>
+        <h1 style="background: linear-gradient(var(--blue), var(--gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">CLIENT SECURE LOGIN</h1>
         <input type="email" id="email" placeholder="Client Email">
         <input type="password" id="password" placeholder="Access Code">
         <button onclick="checkLogin()">AUTHORIZE ACCESS</button>
     </div>
 
     <div id="admin-panel" class="container" style="display:none;">
-        <h2 style="color:var(--gold)">SITE EDITOR MODE</h2>
-        <div class="editor-panel" style="display:block;">
-            <label>Site Title:</label>
-            <input type="text" id="edit-title" placeholder="Enter Website Title" oninput="updatePreview()">
-            
-            <label>Image URL:</label>
-            <input type="text" id="edit-image" placeholder="Paste Image Link (JPG/PNG)" oninput="updatePreview()">
-            
-            <label>Main Content Text:</label>
-            <textarea id="edit-text" rows="5" placeholder="Write website description..." oninput="updatePreview()"></textarea>
-            
-            <button onclick="publishSite()" style="background:var(--blue)">🚀 UPLOAD & PUBLISH TO PUBLIC</button>
-        </div>
+        <h2 style="color:var(--gold)">SITE EDITOR</h2>
+        <input type="text" id="edit-title" placeholder="Website Title" oninput="updatePreview()">
+        <input type="text" id="edit-image" placeholder="Image URL (Link)">
+        <textarea id="edit-text" rows="4" placeholder="Description Text" oninput="updatePreview()"></textarea>
+        <button id="pub-btn" onclick="publishSite()">UPLOAD & PUBLISH TO PUBLIC</button>
 
-        <h2 style="color:var(--blue)">LIVE PREVIEW</h2>
-        <div class="preview-site" id="site-display">
-            <h1 id="view-title">Your Title Here</h1>
-            <img id="view-image" src="https://via.placeholder.com/600x300" alt="Client Image">
-            <p id="view-text">Your website description will appear here as you type...</p>
+        <div class="preview" id="preview-box">
+            <h3 id="v-title">Title Preview</h3>
+            <p id="v-text">Description preview...</p>
         </div>
     </div>
 
     <script>
-        // Simple security logic (You can connect this to Firebase Auth later)
-        function checkLogin() {
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('password').value;
-
-            if(email === "client@gmail.com" && pass === "stark2026") {
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('admin-panel').style.display = 'block';
-            } else {
-                alert("Unauthorized Access. Email or Password incorrect.");
-            }
-        }
-
-        // Live Update Logic
         function updatePreview() {
-            document.getElementById('view-title').innerText = document.getElementById('edit-title').value || "Your Title Here";
-            document.getElementById('view-text').innerText = document.getElementById('edit-text').value || "Your website description will appear here...";
-            
-            const imgUrl = document.getElementById('edit-image').value;
-            if(imgUrl) {
-                document.getElementById('view-image').src = imgUrl;
-            }
-        }
-
-        // Publish Logic (Simulating Firebase Upload)
-        function publishSite() {
-            const title = document.getElementById('edit-title').value;
-            alert("SUCCESS: Website '" + title + "' has been uploaded to the public server!");
-            // In a real app, this function would send data to Firebase Firestore
+            document.getElementById('v-title').innerText = document.getElementById('edit-title').value || "Title Preview";
+            document.getElementById('v-text').innerText = document.getElementById('edit-text').value || "Description preview...";
         }
     </script>
 </body>
 </html>
+      
