@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Site Manager | Love-Music-AI Corp</title>
+    <style>
+        :root { --blue: #38bdf8; --gold: #fbbf24; --dark: #070a13; }
+        body { background: var(--dark); color: white; font-family: sans-serif; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: auto; border: 2px solid var(--blue); border-radius: 20px; padding: 20px; box-shadow: 0 0 20px var(--blue); }
+        
+        /* Editor Controls */
+        .editor-panel { background: #111827; padding: 20px; border-radius: 15px; border: 1px solid var(--gold); margin-bottom: 30px; display: none; }
+        input, textarea { width: 100%; padding: 12px; margin: 10px 0; background: #1f2937; border: 1px solid var(--blue); color: white; border-radius: 8px; box-sizing: border-box; }
+        button { background: var(--gold); color: black; font-weight: bold; padding: 12px 25px; border: none; border-radius: 30px; cursor: pointer; }
+        
+        /* Live Preview Section */
+        .preview-site { background: white; color: black; padding: 40px; border-radius: 10px; text-align: center; }
+        .preview-site img { max-width: 100%; height: 300px; object-fit: cover; border-radius: 10px; margin: 20px 0; }
+        
+        #login-screen { text-align: center; padding: 50px; }
+    </style>
+</head>
+<body>
+
+    <div id="login-screen" class="container">
+        <h1>CLIENT SECURE LOGIN</h1>
+        <input type="email" id="email" placeholder="Client Email">
+        <input type="password" id="password" placeholder="Access Code">
+        <button onclick="checkLogin()">AUTHORIZE ACCESS</button>
+    </div>
+
+    <div id="admin-panel" class="container" style="display:none;">
+        <h2 style="color:var(--gold)">SITE EDITOR MODE</h2>
+        <div class="editor-panel" style="display:block;">
+            <label>Site Title:</label>
+            <input type="text" id="edit-title" placeholder="Enter Website Title" oninput="updatePreview()">
+            
+            <label>Image URL:</label>
+            <input type="text" id="edit-image" placeholder="Paste Image Link (JPG/PNG)" oninput="updatePreview()">
+            
+            <label>Main Content Text:</label>
+            <textarea id="edit-text" rows="5" placeholder="Write website description..." oninput="updatePreview()"></textarea>
+            
+            <button onclick="publishSite()" style="background:var(--blue)">🚀 UPLOAD & PUBLISH TO PUBLIC</button>
+        </div>
+
+        <h2 style="color:var(--blue)">LIVE PREVIEW</h2>
+        <div class="preview-site" id="site-display">
+            <h1 id="view-title">Your Title Here</h1>
+            <img id="view-image" src="https://via.placeholder.com/600x300" alt="Client Image">
+            <p id="view-text">Your website description will appear here as you type...</p>
+        </div>
+    </div>
+
+    <script>
+        // Simple security logic (You can connect this to Firebase Auth later)
+        function checkLogin() {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+
+            if(email === "client@gmail.com" && pass === "stark2026") {
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('admin-panel').style.display = 'block';
+            } else {
+                alert("Unauthorized Access. Email or Password incorrect.");
+            }
+        }
+
+        // Live Update Logic
+        function updatePreview() {
+            document.getElementById('view-title').innerText = document.getElementById('edit-title').value || "Your Title Here";
+            document.getElementById('view-text').innerText = document.getElementById('edit-text').value || "Your website description will appear here...";
+            
+            const imgUrl = document.getElementById('edit-image').value;
+            if(imgUrl) {
+                document.getElementById('view-image').src = imgUrl;
+            }
+        }
+
+        // Publish Logic (Simulating Firebase Upload)
+        function publishSite() {
+            const title = document.getElementById('edit-title').value;
+            alert("SUCCESS: Website '" + title + "' has been uploaded to the public server!");
+            // In a real app, this function would send data to Firebase Firestore
+        }
+    </script>
+</body>
+</html>
